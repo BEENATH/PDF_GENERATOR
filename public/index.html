@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroPDF | PDF Generator API</title>
+  <meta name="description" content="A powerful REST API to generate professional invoice PDFs and documents from HTML, Markdown, and templates.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- ═══ Header ═══ -->
+    <header class="main-header">
+      <div class="logo-area">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5C3.89 3 3 3.89 3 5V19C3 20.11 3.89 21 5 21H19C20.11 21 21 20.11 21 19V5C21 3.89 20.11 3 19 3ZM16 17H8V15H16V17ZM16 13H8V11H16V13ZM16 9H8V7H16V9Z"/></svg>
+        <span class="logo-text">Aero<span>PDF</span></span>
+        <span class="version-badge">v1.0.0</span>
+      </div>
+      <nav class="main-nav">
+        <button class="nav-btn active" data-page="playground">Playground</button>
+        <button class="nav-btn" data-page="invoice">Invoice Generator</button>
+        <button class="nav-btn" data-page="docs">API Docs</button>
+      </nav>
+      <div class="status-indicator">
+        <span class="pulse-dot"></span>
+        <span class="status-text">Online</span>
+        <span class="auth-badge" id="authBadge">🔑 Key Required</span>
+      </div>
+    </header>
+
+    <!-- ═══ API Key Bar ═══ -->
+    <div class="api-key-bar">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: var(--accent-blue); flex-shrink:0;"><path d="M12.65 10C11.83 7.67 9.61 6 7 6C3.69 6 1 8.69 1 12C1 15.31 3.69 18 7 18C9.61 18 11.83 16.33 12.65 14H17V18H21V14H23V10H12.65ZM7 14C5.9 14 5 13.1 5 12C5 10.9 5.9 10 7 10C8.1 10 9 10.9 9 12C9 13.1 8.1 14 7 14Z"/></svg>
+      <label for="apiKeyInput" style="font-size:12px;font-weight:700;color:var(--text-muted);white-space:nowrap;">API KEY</label>
+      <input type="password" id="apiKeyInput" value="pdf_dev_key_abc123" placeholder="Enter your API Key…">
+      <button class="btn-icon" id="toggleApiKey" title="Show/Hide">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z"/></svg>
+      </button>
+      <div class="key-divider"></div>
+      <span id="baseUrlDisplay" class="base-url-display"></span>
+    </div>
+
+    <!-- ═══ Pages ═══ -->
+    <main class="pages-container">
+
+      <!-- ══ PAGE: Playground ══ -->
+      <div class="page active" id="page-playground">
+        <div class="workspace">
+          <section class="controls-panel">
+            <div class="card panel-card">
+              <div class="tabs-header">
+                <button class="tab-btn active" data-tab="html">HTML</button>
+                <button class="tab-btn" data-tab="url">URL</button>
+                <button class="tab-btn" data-tab="markdown">Markdown</button>
+                <button class="tab-btn" data-tab="templates">Templates</button>
+              </div>
+
+              <div class="tabs-content">
+                <!-- HTML -->
+                <div class="tab-panel active" id="panel-html">
+                  <div class="editor-header"><span>Raw HTML</span><button class="btn-small-outline" id="loadSampleHtml">Reset</button></div>
+                  <textarea id="htmlInput" class="code-editor" spellcheck="false"></textarea>
+                </div>
+                <!-- URL -->
+                <div class="tab-panel" id="panel-url">
+                  <label class="section-label">Target URL</label>
+                  <div class="input-wrapper" style="margin-top:6px">
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12C3.9 10.29 5.29 8.9 7 8.9H11V7H7C4.24 7 2 9.24 2 12C2 14.76 4.24 17 7 17H11V15.1H7C5.29 15.1 3.9 13.71 3.9 12ZM8 13H16V11H8V13ZM17 7H13V8.9H17C18.71 8.9 20.1 10.29 20.1 12C20.1 13.71 18.71 15.1 17 15.1H13V17H17C19.76 17 22 14.76 22 12C22 9.24 19.76 7 17 7Z"/></svg>
+                    <input type="url" id="urlInput" value="https://example.com">
+                  </div>
+                  <p class="input-hint">Puppeteer browses this URL, waits for JS to load, then prints it to PDF.</p>
+                </div>
+                <!-- Markdown -->
+                <div class="tab-panel" id="panel-markdown">
+                  <div class="editor-header"><span>Markdown</span><button class="btn-small-outline" id="loadSampleMarkdown">Reset</button></div>
+                  <textarea id="markdownInput" class="code-editor" spellcheck="false"></textarea>
+                </div>
+                <!-- Templates -->
+                <div class="tab-panel" id="panel-templates">
+                  <label class="section-label">Template</label>
+                  <select id="templateSelect" class="styled-select" style="margin-top:6px"></select>
+                  <div class="editor-header" style="margin-top:14px"><span>Data (JSON)</span></div>
+                  <textarea id="templateDataInput" class="code-editor" spellcheck="false" style="height:200px"></textarea>
+                </div>
+              </div>
+
+              <!-- PDF Options -->
+              <div class="settings-section">
+                <div class="settings-toggle" id="settingsToggle">
+                  <span class="section-label" style="margin:0">PDF Options</span>
+                  <svg class="chevron-icon" id="settingsChevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17L16.59 8.59L18 10L12 16L6 10L7.41 8.59Z"/></svg>
+                </div>
+                <div class="settings-content collapsed" id="settingsContent">
+                  <div class="grid-2">
+                    <div class="form-group"><label>Format</label><select id="pdfFormat" class="styled-select"><option value="A4">A4</option><option value="Letter">Letter</option><option value="Legal">Legal</option></select></div>
+                    <div class="form-group"><label>Orientation</label><select id="pdfOrientation" class="styled-select"><option value="false">Portrait</option><option value="true">Landscape</option></select></div>
+                  </div>
+                  <div class="grid-2">
+                    <div class="form-group"><label>Scale</label><input type="number" id="pdfScale" min="0.1" max="2" step="0.1" value="1"></div>
+                    <div class="form-group"><label>Filename</label><input type="text" id="pdfFilename" value="generated-document.pdf"></div>
+                  </div>
+                  <div class="grid-2">
+                    <div class="form-group"><label>Margin Top</label><input type="text" id="marginTop" value="15mm"></div>
+                    <div class="form-group"><label>Margin Bottom</label><input type="text" id="marginBottom" value="15mm"></div>
+                  </div>
+                  <div class="grid-2">
+                    <div class="form-group"><label>Margin Left</label><input type="text" id="marginLeft" value="15mm"></div>
+                    <div class="form-group"><label>Margin Right</label><input type="text" id="marginRight" value="15mm"></div>
+                  </div>
+                  <div class="checkbox-group"><label class="checkbox-container"><input type="checkbox" id="printBackground" checked><span class="checkmark"></span>Print Background</label></div>
+                </div>
+              </div>
+
+              <div class="actions-panel">
+                <button class="btn btn-primary" id="btnPreview">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:8px"><path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5Z"/></svg>
+                  Preview PDF
+                </button>
+                <button class="btn btn-secondary" id="btnDownload">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:8px"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4C9.11 4 6.6 5.64 5.35 8.04C2.34 8.36 0 10.91 0 14C0 17.31 2.69 20 6 20H19C21.76 20 24 17.76 24 15C24 12.36 21.95 10.22 19.35 10.04ZM17 13L12 18L7 13H10V9H14V13H17Z"/></svg>
+                  Download
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="preview-panel">
+            <div class="card preview-card">
+              <div class="preview-header">
+                <span class="preview-title">PDF Preview</span>
+                <div class="performance-metric" id="perfMetric" style="display:none">⚡ <span id="perfVal">0</span>ms</div>
+              </div>
+              <div class="preview-content">
+                <div class="loader-overlay" id="loaderOverlay"><div class="spinner"></div><div class="loading-status">Rendering with Puppeteer…</div></div>
+                <div class="preview-placeholder" id="previewPlaceholder">
+                  <svg class="placeholder-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 2H5C3.9 2 3 2.9 3 4V20C3 21.1 3.9 22 5 22H19C20.1 22 21 21.1 21 20V4C21 2.9 20.1 2 19 2Z"/></svg>
+                  <h3>No PDF Generated Yet</h3>
+                  <p>Click <strong>Preview PDF</strong> or <strong>Download</strong> to generate.</p>
+                </div>
+                <iframe id="pdfIframe" class="pdf-viewer" style="display:none"></iframe>
+              </div>
+              <!-- Code Snippets -->
+              <div class="code-integration-section">
+                <div class="tabs-header code-tabs">
+                  <button class="code-tab-btn active" data-lang="curl">cURL</button>
+                  <button class="code-tab-btn" data-lang="javascript">JavaScript</button>
+                  <button class="code-tab-btn" data-lang="python">Python</button>
+                </div>
+                <div class="code-container">
+                  <pre><code id="codeSnippet" class="code-block jetbrains-font"></code></pre>
+                  <button class="btn-copy" id="btnCopySnippet">Copy</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: Invoice Generator ══ -->
+      <div class="page" id="page-invoice">
+        <div class="invoice-workspace">
+
+          <!-- Left: Form -->
+          <div class="invoice-form-panel">
+            <div class="card panel-card">
+              <div class="inv-section-title">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z"/></svg>
+                Invoice Details
+              </div>
+
+              <!-- Business Info -->
+              <div class="inv-group-label">Your Business</div>
+              <div class="grid-2">
+                <div class="form-group"><label>Company Name</label><input type="text" id="inv-from-company" value="Stellar Cloud Systems Ltd"></div>
+                <div class="form-group"><label>Tax ID (optional)</label><input type="text" id="inv-from-taxid" placeholder="e.g. GST 123456"></div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group"><label>Email</label><input type="email" id="inv-from-email" value="billing@stellarcloud.io"></div>
+                <div class="form-group"><label>Phone</label><input type="text" id="inv-from-phone" placeholder="+1 555 0100"></div>
+              </div>
+              <div class="form-group"><label>Address</label><input type="text" id="inv-from-address" value="100 Innovation Way, Suite 400, San Francisco, CA 94016"></div>
+
+              <div style="height:1px;background:var(--border-color);margin:16px 0"></div>
+
+              <!-- Client Info -->
+              <div class="inv-group-label">Client (Bill To)</div>
+              <div class="grid-2">
+                <div class="form-group"><label>Client Name</label><input type="text" id="inv-to-name" value="CyberDyne Systems Inc"></div>
+                <div class="form-group"><label>Client Email</label><input type="email" id="inv-to-email" value="accounts@cyberdyne.com"></div>
+              </div>
+              <div class="form-group"><label>Client Address</label><input type="text" id="inv-to-address" value="742 Evergreen Terrace, Springfield, OR 97477"></div>
+
+              <div style="height:1px;background:var(--border-color);margin:16px 0"></div>
+
+              <!-- Invoice Meta -->
+              <div class="inv-group-label">Invoice Info</div>
+              <div class="grid-2">
+                <div class="form-group"><label>Invoice Number</label><input type="text" id="inv-number" value="INV-2026-001"></div>
+                <div class="form-group"><label>Currency Symbol</label><input type="text" id="inv-currency-symbol" value="$"></div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group"><label>Invoice Date</label><input type="text" id="inv-date" value="June 5, 2026"></div>
+                <div class="form-group"><label>Due Date</label><input type="text" id="inv-due" value="July 5, 2026"></div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group"><label>Tax Rate (%)</label><input type="number" id="inv-tax" value="8" min="0" max="100"></div>
+                <div class="form-group"><label>Discount (%)</label><input type="number" id="inv-discount" value="0" min="0" max="100"></div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group"><label>Payment Method</label><input type="text" id="inv-payment" value="Bank Wire Transfer"></div>
+                <div class="form-group"><label>Accent Color</label><input type="color" id="inv-color" value="#2563eb" style="height:42px;cursor:pointer;"></div>
+              </div>
+              <div class="form-group"><label>Logo Image URL (optional)</label><input type="text" id="inv-logo-url" placeholder="e.g. https://raw.githubusercontent.com/google/material-design-icons/master/png/action/extension/materialicons/24dp/2x/baseline_extension_black_24dp.png"></div>
+              <div class="grid-2">
+                <div class="form-group"><label>Logo Width</label><input type="text" id="inv-logo-width" value="120px"></div>
+                <div class="form-group"><label>Font Family</label><select id="inv-font-family" class="styled-select"><option value="Inter">Inter (Sans-Serif)</option><option value="Outfit">Outfit (Modern)</option><option value="Playfair Display">Playfair Display (Elegant Serif)</option><option value="Roboto">Roboto (Clean)</option><option value="JetBrains Mono">JetBrains Mono (Sleek Monospace)</option><option value="Courier Prime">Courier Prime (Retro typewriter)</option></select></div>
+              </div>
+              <div class="form-group"><label>Notes</label><textarea id="inv-notes" style="height:60px" placeholder="e.g. Payment due within 30 days. Thank you!">Payment due within 30 days. Thank you for your business!</textarea></div>
+
+              <div style="height:1px;background:var(--border-color);margin:16px 0"></div>
+
+              <!-- Line Items -->
+              <div class="inv-group-label">
+                Line Items
+                <button class="btn-small-outline" id="addItemBtn" style="margin-left:auto">+ Add Item</button>
+              </div>
+              <div id="itemsList"></div>
+
+              <!-- Actions -->
+              <div class="actions-panel" style="margin-top:8px">
+                <button class="btn btn-primary" id="invBtnPreview">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:8px"><path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5Z"/></svg>
+                  Preview Invoice
+                </button>
+                <button class="btn btn-secondary" id="invBtnDownload">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:8px"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4C9.11 4 6.6 5.64 5.35 8.04C2.34 8.36 0 10.91 0 14C0 17.31 2.69 20 6 20H19C21.76 20 24 17.76 24 15C24 12.36 21.95 10.22 19.35 10.04ZM17 13L12 18L7 13H10V9H14V13H17Z"/></svg>
+                  Download PDF
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Preview + Code -->
+          <div class="invoice-preview-panel">
+            <div class="card preview-card">
+              <div class="preview-header">
+                <span class="preview-title">Invoice Preview</span>
+                <div class="performance-metric" id="invPerfMetric" style="display:none">⚡ <span id="invPerfVal">0</span>ms</div>
+              </div>
+              <div class="preview-content">
+                <div class="loader-overlay" id="invLoaderOverlay"><div class="spinner"></div><div class="loading-status">Generating Invoice PDF…</div></div>
+                <div class="preview-placeholder" id="invPreviewPlaceholder">
+                  <svg class="placeholder-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z"/></svg>
+                  <h3>Invoice Ready to Generate</h3>
+                  <p>Fill in the form on the left, then click <strong>Preview Invoice</strong>.</p>
+                </div>
+                <iframe id="invPdfIframe" class="pdf-viewer" style="display:none"></iframe>
+              </div>
+
+              <!-- Integration Code -->
+              <div class="code-integration-section">
+                <div class="tabs-header code-tabs">
+                  <button class="code-tab-btn active" data-lang="curl">cURL</button>
+                  <button class="code-tab-btn" data-lang="javascript">JavaScript (fetch)</button>
+                  <button class="code-tab-btn" data-lang="python">Python</button>
+                </div>
+                <div class="code-container">
+                  <pre><code id="invCodeSnippet" class="code-block jetbrains-font"></code></pre>
+                  <button class="btn-copy" id="invBtnCopy">Copy</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PAGE: API Docs ══ -->
+      <div class="page" id="page-docs">
+        <div class="docs-container">
+          <div class="docs-hero">
+            <h1>AeroPDF REST API <span class="version-badge" style="font-size:14px;vertical-align:middle;">v1.0.0</span></h1>
+            <p>A self-hosted PDF generation service. All endpoints require an API Key unless disabled in the server configuration.</p>
+          </div>
+
+          <div class="docs-grid">
+
+            <div class="doc-card highlight-card">
+              <div class="doc-method post">POST</div>
+              <div class="doc-path">/api/v1/generate/invoice</div>
+              <div class="doc-desc">⭐ <strong>Recommended for invoice projects.</strong> Send structured JSON — the service builds and renders the PDF automatically. No HTML knowledge needed.</div>
+              <div class="doc-fields">
+                <div class="field-row"><span class="field-name">from</span><span class="field-type">object</span><span class="field-desc">Your business info (company, email, address, phone, taxId)</span></div>
+                <div class="field-row"><span class="field-name">to</span><span class="field-type">object</span><span class="field-desc">Client info (name, company, email, address)</span></div>
+                <div class="field-row"><span class="field-name">invoiceNumber</span><span class="field-type">string</span><span class="field-desc">e.g. "INV-2026-001"</span></div>
+                <div class="field-row"><span class="field-name">invoiceDate</span><span class="field-type">string</span><span class="field-desc">e.g. "June 5, 2026"</span></div>
+                <div class="field-row"><span class="field-name">dueDate</span><span class="field-type">string</span><span class="field-desc">e.g. "July 5, 2026"</span></div>
+                <div class="field-row req"><span class="field-name">items</span><span class="field-type">array</span><span class="field-desc required">Required. [{name, description, quantity, unitPrice}]</span></div>
+                <div class="field-row"><span class="field-name">taxRate</span><span class="field-type">number</span><span class="field-desc">Tax % e.g. 8</span></div>
+                <div class="field-row"><span class="field-name">discountRate</span><span class="field-type">number</span><span class="field-desc">Discount % e.g. 5</span></div>
+                <div class="field-row"><span class="field-name">currency / currencySymbol</span><span class="field-type">string</span><span class="field-desc">e.g. "USD" / "$"</span></div>
+                <div class="field-row"><span class="field-name">accentColor</span><span class="field-type">string</span><span class="field-desc">Brand color hex e.g. "#2563eb"</span></div>
+                <div class="field-row"><span class="field-name">notes</span><span class="field-type">string</span><span class="field-desc">Footer message e.g. "Payment due in 30 days"</span></div>
+                <div class="field-row"><span class="field-name">paymentMethod</span><span class="field-type">string</span><span class="field-desc">e.g. "Bank Transfer"</span></div>
+                <div class="field-row"><span class="field-name">download</span><span class="field-type">boolean</span><span class="field-desc">true = attachment download (browser prompt)</span></div>
+                <div class="field-row"><span class="field-name">filename</span><span class="field-type">string</span><span class="field-desc">Output filename e.g. "invoice-001.pdf"</span></div>
+              </div>
+            </div>
+
+            <div class="doc-card">
+              <div class="doc-method post">POST</div>
+              <div class="doc-path">/api/v1/generate/html</div>
+              <div class="doc-desc">Convert any raw HTML string into a PDF. Supports full CSS, Google Fonts, and inline styles.</div>
+              <div class="doc-fields">
+                <div class="field-row req"><span class="field-name">html</span><span class="field-type">string</span><span class="field-desc required">Required. Full HTML document string.</span></div>
+                <div class="field-row"><span class="field-name">options</span><span class="field-type">object</span><span class="field-desc">format, landscape, marginTop/Bottom/Left/Right, scale, printBackground</span></div>
+              </div>
+            </div>
+
+            <div class="doc-card">
+              <div class="doc-method post">POST</div>
+              <div class="doc-path">/api/v1/generate/url</div>
+              <div class="doc-desc">Navigate to any public URL using headless Chrome and print the rendered page as PDF. Supports JavaScript-heavy SPAs.</div>
+              <div class="doc-fields">
+                <div class="field-row req"><span class="field-name">url</span><span class="field-type">string</span><span class="field-desc required">Required. Full URL including https://</span></div>
+                <div class="field-row"><span class="field-name">options</span><span class="field-type">object</span><span class="field-desc">format, landscape, margins, scale</span></div>
+              </div>
+            </div>
+
+            <div class="doc-card">
+              <div class="doc-method post">POST</div>
+              <div class="doc-path">/api/v1/generate/markdown</div>
+              <div class="doc-desc">Convert GitHub Flavored Markdown — tables, code blocks, headings, blockquotes — into a clean, typeset PDF document.</div>
+              <div class="doc-fields">
+                <div class="field-row req"><span class="field-name">markdown</span><span class="field-type">string</span><span class="field-desc required">Required. Markdown content string.</span></div>
+                <div class="field-row"><span class="field-name">options</span><span class="field-type">object</span><span class="field-desc">format, landscape, margins</span></div>
+              </div>
+            </div>
+
+            <div class="doc-card">
+              <div class="doc-method post">POST</div>
+              <div class="doc-path">/api/v1/generate/template</div>
+              <div class="doc-desc">Supply a Handlebars HTML template and a JSON data object. The service compiles and renders the result as PDF.</div>
+              <div class="doc-fields">
+                <div class="field-row req"><span class="field-name">template</span><span class="field-type">string</span><span class="field-desc required">Required. HTML with {{variable}} bindings.</span></div>
+                <div class="field-row"><span class="field-name">data</span><span class="field-type">object</span><span class="field-desc">JSON variables to inject into the template.</span></div>
+              </div>
+            </div>
+
+            <div class="doc-card">
+              <div class="doc-method get">GET</div>
+              <div class="doc-path">/api/v1/health</div>
+              <div class="doc-desc">Check server health, version info, auth status, and available endpoints. No API key required.</div>
+            </div>
+
+          </div>
+
+          <div class="auth-docs-card">
+            <h2>Authentication</h2>
+            <p>Include your API key in any of these ways:</p>
+            <pre class="code-block jetbrains-font" style="margin-top:12px;font-size:12px;">
+Authorization: Bearer &lt;YOUR_API_KEY&gt;
+x-api-key: &lt;YOUR_API_KEY&gt;
+?apiKey=&lt;YOUR_API_KEY&gt;   (query param)</pre>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

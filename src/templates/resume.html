@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Resume</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #334155;
+      background-color: #ffffff;
+      line-height: 1.5;
+    }
+    
+    .resume-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* Left Sidebar */
+    .sidebar {
+      width: 30%;
+      background-color: #0f172a; /* Slate 900 */
+      color: #f1f5f9;
+      padding: 40px 30px;
+      box-sizing: border-box;
+    }
+    
+    .profile-img-placeholder {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: #38bdf8; /* Sky 400 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      font-weight: bold;
+      color: #0f172a;
+      margin-bottom: 25px;
+    }
+    
+    .sidebar-section {
+      margin-bottom: 35px;
+    }
+    
+    .sidebar-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #38bdf8;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .contact-item {
+      font-size: 13px;
+      margin-bottom: 12px;
+      word-wrap: break-word;
+    }
+    
+    .contact-label {
+      font-weight: 600;
+      color: #94a3b8;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    
+    .skill-tag {
+      display: inline-block;
+      background-color: #1e293b;
+      color: #e2e8f0;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-right: 6px;
+      margin-bottom: 8px;
+      border: 1px solid #334155;
+    }
+    
+    /* Main Content */
+    .main-content {
+      width: 70%;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+    
+    .header {
+      margin-bottom: 35px;
+    }
+    
+    .name {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 5px 0;
+      letter-spacing: -0.5px;
+    }
+    
+    .title {
+      font-size: 18px;
+      font-weight: 500;
+      color: #0284c7; /* Sky 600 */
+      margin: 0;
+    }
+    
+    .summary {
+      font-size: 14px;
+      color: #475569;
+      margin-top: 15px;
+      text-align: justify;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #0f172a;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .experience-item {
+      margin-bottom: 20px;
+    }
+    
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 5px;
+    }
+    
+    .item-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: #1e293b;
+    }
+    
+    .item-company {
+      font-weight: 500;
+      color: #0284c7;
+      font-size: 14px;
+    }
+    
+    .item-date {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    
+    .item-desc {
+      font-size: 13.5px;
+      color: #475569;
+      margin: 5px 0 0 0;
+      padding-left: 15px;
+    }
+    
+    .item-desc li {
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="resume-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="profile-img-placeholder">
+        {{initials}}
+      </div>
+      
+      <div class="sidebar-section">
+        <div class="sidebar-title">Contact</div>
+        <div class="contact-item">
+          <div class="contact-label">Phone</div>
+          {{phone}}
+        </div>
+        <div class="contact-item">
+          <div class="contact-label">Email</div>
+          {{email}}
+        </div>
+        <div class="contact-item">
+          <div class="contact-label">Location</div>
+          {{location}}
+        </div>
+        <div class="contact-item">
+          <div class="contact-label">Website</div>
+          {{website}}
+        </div>
+      </div>
+      
+      <div class="sidebar-section">
+        <div class="sidebar-title">Skills</div>
+        <div>
+          {{#each skills}}
+          <span class="skill-tag">{{this}}</span>
+          {{/each}}
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Languages</div>
+        {{#each languages}}
+        <div style="font-size: 13px; margin-bottom: 8px;">
+          <strong>{{this.name}}</strong> - <span style="color: #94a3b8;">{{this.level}}</span>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="header">
+        <h1 class="name">{{fullName}}</h1>
+        <h2 class="title">{{professionalTitle}}</h2>
+        <p class="summary">{{summary}}</p>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Experience</div>
+        {{#each experience}}
+        <div class="experience-item">
+          <div class="item-header">
+            <div>
+              <span class="item-title">{{this.role}}</span> - 
+              <span class="item-company">{{this.company}}</span>
+            </div>
+            <div class="item-date">{{this.duration}}</div>
+          </div>
+          <ul class="item-desc">
+            {{#each this.highlights}}
+            <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        {{/each}}
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Education</div>
+        {{#each education}}
+        <div style="margin-bottom: 15px;">
+          <div class="item-header">
+            <div>
+              <span class="item-title">{{this.degree}}</span> - 
+              <span style="color: #475569; font-weight: 500; font-size: 14px;">{{this.school}}</span>
+            </div>
+            <div class="item-date">{{this.duration}}</div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Achievement</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&family=Great+Vibes&display=swap');
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      color: #333;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    
+    .certificate-container {
+      width: 90%;
+      height: 90%;
+      border: 20px solid #1e293b; /* Dark Navy Outer Border */
+      padding: 30px;
+      position: relative;
+      box-sizing: border-box;
+      background-color: #fafaf9;
+    }
+    
+    .inner-border {
+      border: 4px double #d97706; /* Gold Inner Border */
+      height: 100%;
+      width: 100%;
+      padding: 40px;
+      box-sizing: border-box;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .logo-container {
+      margin-top: 10px;
+    }
+    
+    .logo-text {
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: #1e293b;
+      letter-spacing: 3px;
+    }
+    
+    .certificate-title {
+      font-family: 'Cinzel', serif;
+      font-size: 38px;
+      color: #d97706;
+      margin: 10px 0;
+      font-weight: 700;
+      letter-spacing: 4px;
+    }
+    
+    .subtitle {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #64748b;
+      margin-bottom: 25px;
+    }
+    
+    .presented-to {
+      font-size: 16px;
+      font-style: italic;
+      color: #475569;
+      margin-bottom: 10px;
+    }
+    
+    .recipient-name {
+      font-family: 'Great Vibes', cursive;
+      font-size: 56px;
+      color: #1e293b;
+      margin: 10px 0;
+    }
+    
+    .recipient-line {
+      width: 60%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, #d97706, transparent);
+      margin: 5px auto 20px auto;
+    }
+    
+    .description {
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 650px;
+      margin: 0 auto;
+      color: #475569;
+    }
+    
+    .course-title {
+      font-weight: 600;
+      color: #1e293b;
+    }
+    
+    .signatures-container {
+      display: flex;
+      justify-content: space-between;
+      width: 80%;
+      margin: 30px auto 10px auto;
+    }
+    
+    .signature-block {
+      width: 200px;
+    }
+    
+    .signature-line {
+      border-bottom: 1px solid #94a3b8;
+      height: 40px;
+      margin-bottom: 8px;
+    }
+    
+    .signature-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    
+    .signature-title {
+      font-size: 10px;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate-container">
+    <div class="inner-border">
+      <div class="logo-container">
+        <div class="logo-text">{{issuerName}}</div>
+      </div>
+      
+      <div>
+        <div class="certificate-title">Certificate of Achievement</div>
+        <div class="subtitle">This is proudly presented to</div>
+        
+        <div class="recipient-name">{{recipientName}}</div>
+        <div class="recipient-line"></div>
+        
+        <div class="description">
+          for successfully completing the course <span class="course-title">"{{courseTitle}}"</span><br>
+          demonstrating outstanding performance, dedication, and mastery of all required competencies.
+        </div>
+      </div>
+      
+      <div class="signatures-container">
+        <div class="signature-block">
+          <div class="signature-line" style="font-family: 'Great Vibes', cursive; font-size: 26px; line-height: 50px; text-align: center; border: none; color: #1e293b;">
+            {{instructorName}}
+          </div>
+          <div class="signature-line" style="height: 0px; margin-top: -10px;"></div>
+          <div class="signature-name">{{instructorName}}</div>
+          <div class="signature-title">Lead Instructor</div>
+        </div>
+        
+        <div class="signature-block">
+          <div class="signature-line" style="font-size: 14px; line-height: 55px; text-align: center; border: none; color: #1e293b;">
+            {{issueDate}}
+          </div>
+          <div class="signature-line" style="height: 0px; margin-top: -10px;"></div>
+          <div class="signature-name">Date of Issue</div>
+          <div class="signature-title">ID: {{certificateId}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
