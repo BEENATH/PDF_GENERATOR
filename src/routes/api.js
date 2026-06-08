@@ -407,33 +407,33 @@ function buildInvoiceHtml(data) {
 </html>`;
 }
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+// ─── Route Handlers ───────────────────────────────────────────────────────────
 
-/**
- * POST /api/v1/generate/invoice
- *
- * PURPOSE: Dedicated invoice PDF endpoint. External projects send structured JSON
- * invoice data and receive a pixel-perfect PDF binary stream in return.
- *
- * BODY FIELDS:
- *   from            {object}  - Your business info (company, address, email, phone, taxId)
- *   to              {object}  - Client info (name, company, address, city, email)
- *   invoiceNumber   {string}  - e.g. "INV-2026-001"
- *   invoiceDate     {string}  - e.g. "June 5, 2026"
- *   dueDate         {string}  - e.g. "July 5, 2026"
- *   currency        {string}  - e.g. "USD"
- *   currencySymbol  {string}  - e.g. "$"
- *   items           {array}   - [{ name, description, quantity, unitPrice }]
- *   taxRate         {number}  - e.g. 8  (means 8%)
- *   discountRate    {number}  - e.g. 5  (means 5%)
- *   paymentMethod   {string}  - e.g. "Bank Transfer"
- *   notes           {string}  - Any footer notes
- *   accentColor     {string}  - e.g. "#2563eb" (brand color)
- *   filename        {string}  - Output filename (default: invoice.pdf)
- *   download        {boolean} - true = attachment download, false = inline preview
- */
-router.post('/generate/invoice', async (req, res) => {
-  const body = req.body;
+const handleInvoiceGenerate = async (req, res) => {
+  let body;
+  if (req.method === 'GET') {
+    if (req.query.data) {
+      try {
+        body = JSON.parse(req.query.data);
+      } catch (e) {
+        return res.status(400).json({ success: false, error: 'Invalid JSON in "data" query parameter.' });
+      }
+    } else {
+      body = { ...req.query };
+      // Parse nested objects/arrays if they are JSON strings
+      if (typeof body.from === 'string') {
+        try { body.from = JSON.parse(body.from); } catch (e) {}
+      }
+      if (typeof body.to === 'string') {
+        try { body.to = JSON.parse(body.to); } catch (e) {}
+      }
+      if (typeof body.items === 'string') {
+        try { body.items = JSON.parse(body.items); } catch (e) {}
+      }
+    }
+  } else {
+    body = req.body;
+  }
 
   // Validate: at minimum we need items array
   if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
@@ -452,12 +452,12 @@ router.post('/generate/invoice', async (req, res) => {
     const html = buildInvoiceHtml(body);
     const pdfBuffer = await pdfService.generateFromHtml(html, {
       format: body.format || 'A4',
-      landscape: false,
-      printBackground: true,
-      marginTop: '0mm',
-      marginBottom: '0mm',
-      marginLeft: '0mm',
-      marginRight: '0mm'
+      landscape: body.landscape === 'true' || body.landscape === true,
+      printBackground: body.printBackground !== 'false' && body.printBackground !== false,
+      marginTop: body.marginTop || '0mm',
+      marginBottom: body.marginBottom || '0mm',
+      marginLeft: body.marginLeft || '0mm',
+      marginRight: body.marginRight || '0mm'
     });
 
     const filename = body.filename || `invoice-${body.invoiceNumber || 'document'}.pdf`;
@@ -473,75 +473,146 @@ router.post('/generate/invoice', async (req, res) => {
       details: error.message
     });
   }
-});
+};
 
-/**
- * POST /api/v1/generate/html
- * Generate PDF from raw HTML
- */
-router.post('/generate/html', async (req, res) => {
-  const { html, options } = req.body;
+const handleHtmlGenerate = async (req, res) => {
+  let html, options;
+  if (req.method === 'GET') {
+    html = req.query.html;
+    options = req.query.options;
+    if (typeof options === 'string') {
+      try { options = JSON.parse(options); } catch (e) { options = {}; }
+    }
+    if (!options) {
+      options = { ...req.query };
+    }
+  } else {
+    html = req.body.html;
+    options = req.body.options;
+  }
+
   if (!html) {
     return res.status(400).json({ success: false, error: 'Missing required field: "html"' });
   }
+
   try {
     const pdfBuffer = await pdfService.generateFromHtml(html, options);
     sendPdfResponse(res, pdfBuffer, req);
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to generate PDF from HTML', details: error.message });
   }
-});
+};
 
-/**
- * POST /api/v1/generate/url
- * Generate PDF from target URL
- */
-router.post('/generate/url', async (req, res) => {
-  const { url, options } = req.body;
+const handleUrlGenerate = async (req, res) => {
+  let url, options;
+  if (req.method === 'GET') {
+    url = req.query.url;
+    options = req.query.options;
+    if (typeof options === 'string') {
+      try { options = JSON.parse(options); } catch (e) { options = {}; }
+    }
+    if (!options) {
+      options = { ...req.query };
+    }
+  } else {
+    url = req.body.url;
+    options = req.body.options;
+  }
+
   if (!url) {
     return res.status(400).json({ success: false, error: 'Missing required field: "url"' });
   }
+
   try {
     const pdfBuffer = await pdfService.generateFromUrl(url, options);
     sendPdfResponse(res, pdfBuffer, req);
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to generate PDF from URL', details: error.message });
   }
-});
+};
 
-/**
- * POST /api/v1/generate/markdown
- * Generate PDF from Markdown
- */
-router.post('/generate/markdown', async (req, res) => {
-  const { markdown, options } = req.body;
+const handleMarkdownGenerate = async (req, res) => {
+  let markdown, options;
+  if (req.method === 'GET') {
+    markdown = req.query.markdown;
+    options = req.query.options;
+    if (typeof options === 'string') {
+      try { options = JSON.parse(options); } catch (e) { options = {}; }
+    }
+    if (!options) {
+      options = { ...req.query };
+    }
+  } else {
+    markdown = req.body.markdown;
+    options = req.body.options;
+  }
+
   if (!markdown) {
     return res.status(400).json({ success: false, error: 'Missing required field: "markdown"' });
   }
+
   try {
     const pdfBuffer = await pdfService.generateFromMarkdown(markdown, options);
     sendPdfResponse(res, pdfBuffer, req);
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to generate PDF from Markdown', details: error.message });
   }
-});
+};
 
-/**
- * POST /api/v1/generate/template
- * Generate PDF from Handlebars HTML template and JSON Data
- */
-router.post('/generate/template', async (req, res) => {
-  const { template, data, options } = req.body;
+const handleTemplateGenerate = async (req, res) => {
+  let template, data, options;
+  if (req.method === 'GET') {
+    template = req.query.template;
+    data = req.query.data;
+    options = req.query.options;
+    if (typeof data === 'string') {
+      try { data = JSON.parse(data); } catch (e) { data = {}; }
+    }
+    if (typeof options === 'string') {
+      try { options = JSON.parse(options); } catch (e) { options = {}; }
+    }
+    if (!options) {
+      options = { ...req.query };
+    }
+  } else {
+    template = req.body.template;
+    data = req.body.data;
+    options = req.body.options;
+  }
+
   if (!template) {
     return res.status(400).json({ success: false, error: 'Missing required field: "template"' });
   }
+
   try {
     const pdfBuffer = await pdfService.generateFromTemplate(template, data || {}, options);
     sendPdfResponse(res, pdfBuffer, req);
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to generate PDF from template', details: error.message });
   }
-});
+};
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+
+router.route('/generate/invoice')
+  .post(handleInvoiceGenerate)
+  .get(handleInvoiceGenerate);
+
+router.route('/generate/html')
+  .post(handleHtmlGenerate)
+  .get(handleHtmlGenerate);
+
+router.route('/generate/url')
+  .post(handleUrlGenerate)
+  .get(handleUrlGenerate);
+
+router.route('/generate/markdown')
+  .post(handleMarkdownGenerate)
+  .get(handleMarkdownGenerate);
+
+router.route('/generate/template')
+  .post(handleTemplateGenerate)
+  .get(handleTemplateGenerate);
 
 /**
  * GET /api/v1/health
@@ -553,11 +624,11 @@ router.get('/health', (req, res) => {
     version: '1.0.0',
     authRequired: !!process.env.API_KEY,
     endpoints: [
-      'POST /api/v1/generate/invoice',
-      'POST /api/v1/generate/html',
-      'POST /api/v1/generate/url',
-      'POST /api/v1/generate/markdown',
-      'POST /api/v1/generate/template'
+      'GET/POST /api/v1/generate/invoice',
+      'GET/POST /api/v1/generate/html',
+      'GET/POST /api/v1/generate/url',
+      'GET/POST /api/v1/generate/markdown',
+      'GET/POST /api/v1/generate/template'
     ]
   });
 });

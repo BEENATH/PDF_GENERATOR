@@ -203,6 +203,69 @@ test('POST /generate/invoice - should generate PDF from invoice JSON data', asyn
   assert.strictEqual(pdfHeader, '%PDF');
 });
 
+test('GET /generate/html - should generate PDF from HTML query param and API Key', async () => {
+  const html = encodeURIComponent('<html><body><h1>GET HTML</h1></body></html>');
+  const res = await fetch(`${BASE_URL}/generate/html?html=${html}&apiKey=${API_KEY}`);
+
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.headers.get('content-type'), 'application/pdf');
+  
+  const buffer = await res.arrayBuffer();
+  const pdfHeader = String.fromCharCode(...new Uint8Array(buffer.slice(0, 4)));
+  assert.strictEqual(pdfHeader, '%PDF');
+});
+
+test('GET /generate/url - should generate PDF from url query param and API Key', async () => {
+  const url = encodeURIComponent('https://example.com');
+  const res = await fetch(`${BASE_URL}/generate/url?url=${url}&apiKey=${API_KEY}`);
+
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.headers.get('content-type'), 'application/pdf');
+  
+  const buffer = await res.arrayBuffer();
+  const pdfHeader = String.fromCharCode(...new Uint8Array(buffer.slice(0, 4)));
+  assert.strictEqual(pdfHeader, '%PDF');
+});
+
+test('GET /generate/markdown - should generate PDF from markdown query param and API Key', async () => {
+  const markdown = encodeURIComponent('# GET Markdown\n\nSome text');
+  const res = await fetch(`${BASE_URL}/generate/markdown?markdown=${markdown}&apiKey=${API_KEY}`);
+
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.headers.get('content-type'), 'application/pdf');
+  
+  const buffer = await res.arrayBuffer();
+  const pdfHeader = String.fromCharCode(...new Uint8Array(buffer.slice(0, 4)));
+  assert.strictEqual(pdfHeader, '%PDF');
+});
+
+test('GET /generate/template - should generate PDF from template and JSON data query param', async () => {
+  const template = encodeURIComponent('<html><body><h1>Hello {{name}}</h1></body></html>');
+  const data = encodeURIComponent(JSON.stringify({ name: 'GET User' }));
+  const res = await fetch(`${BASE_URL}/generate/template?template=${template}&data=${data}&apiKey=${API_KEY}`);
+
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.headers.get('content-type'), 'application/pdf');
+  
+  const buffer = await res.arrayBuffer();
+  const pdfHeader = String.fromCharCode(...new Uint8Array(buffer.slice(0, 4)));
+  assert.strictEqual(pdfHeader, '%PDF');
+});
+
+test('GET /generate/invoice - should generate PDF from invoice query parameters', async () => {
+  const items = encodeURIComponent(JSON.stringify([
+    { name: 'GET Item', description: 'Item from query parameter', quantity: 1, unitPrice: 100 }
+  ]));
+  const res = await fetch(`${BASE_URL}/generate/invoice?items=${items}&invoiceNumber=INV-GET-123&apiKey=${API_KEY}`);
+
+  assert.strictEqual(res.status, 200);
+  assert.strictEqual(res.headers.get('content-type'), 'application/pdf');
+  
+  const buffer = await res.arrayBuffer();
+  const pdfHeader = String.fromCharCode(...new Uint8Array(buffer.slice(0, 4)));
+  assert.strictEqual(pdfHeader, '%PDF');
+});
+
 // Run all tests
 async function run() {
   let failed = 0;

@@ -10,7 +10,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Enable CORS for all origins (important for client-side API integrations)
-app.use(cors());
+app.use(cors({
+  exposedHeaders: ['Content-Disposition']
+}));
 
 // Logger middleware
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));

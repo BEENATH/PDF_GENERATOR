@@ -75,6 +75,22 @@ const $$ = (sel) => document.querySelectorAll(sel);
 // ─── Init ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   $('baseUrlDisplay').textContent = window.location.origin;
+
+  // Extract API key from URL query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlKey = urlParams.get('apiKey') || urlParams.get('key') || urlParams.get('api_key');
+  
+  if (urlKey) {
+    $('apiKeyInput').value = urlKey;
+    localStorage.setItem('pdf_api_key', urlKey);
+  } else {
+    // Load from localStorage if present
+    const cachedKey = localStorage.getItem('pdf_api_key');
+    if (cachedKey) {
+      $('apiKeyInput').value = cachedKey;
+    }
+  }
+
   $('htmlInput').value = SAMPLES.html;
   $('markdownInput').value = SAMPLES.markdown;
   populateTemplateSelect();
@@ -93,7 +109,19 @@ async function checkHealth() {
     if (r.ok) {
       const d = await r.json();
       const badge = $('authBadge');
-      if (!d.authRequired) { badge.textContent = '🔓 Open Access'; badge.classList.add('open'); }
+      if (!d.authRequired) {
+        badge.textContent = '🔓 Open Access';
+        badge.classList.add('open');
+      } else {
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        if (!isLocalhost && $('apiKeyInput').value === 'pdf_dev_key_abc123') {
+          // Clear default dev key on production to prevent 401 errors
+          $('apiKeyInput').value = '';
+          localStorage.removeItem('pdf_api_key');
+          updateCodeSnippet();
+          updateInvCodeSnippet();
+        }
+      }
     }
   } catch {}
 }
@@ -403,9 +431,16 @@ function bindEvents() {
     const inp = $('apiKeyInput');
     inp.type = inp.type === 'password' ? 'text' : 'password';
   });
-
-  $('apiKeyInput').addEventListener('input', () => { updateCodeSnippet(); updateInvCodeSnippet(); });
-
+  $('apiKeyInput').addEventListener('input', () => {
+    const key = $('apiKeyInput').value.trim();
+    if (key) {
+      localStorage.setItem('pdf_api_key', key);
+    } else {
+      localStorage.removeItem('pdf_api_key');
+    }
+    updateCodeSnippet();
+    updateInvCodeSnippet();
+  });
   // Playground tabs
   $$('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
     $$('.tab-btn').forEach(b => b.classList.remove('active'));
