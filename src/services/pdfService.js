@@ -97,9 +97,16 @@ async function generateFromHtml(htmlContent, options = {}) {
     // Set viewport for consistent rendering
     await page.setViewport({ width: 1280, height: 800 });
 
-    // Set the HTML content
+    // Set the HTML content.
+    // NOTE: We deliberately avoid 'networkidle0' here — on cloud hosts (Render, Railway, etc.)
+    // headless Chrome will try to load external resources (e.g. Google Fonts via @import)
+    // and networkidle0 will wait until ALL those outbound requests settle, which can
+    // easily exceed 30s and cause a navigation timeout.  'load' + 'domcontentloaded' is
+    // sufficient for PDF rendering because Puppeteer's pdf() call happens after the DOM
+    // is fully parsed; fonts that fail to load just fall back to system fonts.
     await page.setContent(htmlContent, {
-      waitUntil: ['load', 'networkidle0', 'domcontentloaded']
+      waitUntil: ['load', 'domcontentloaded'],
+      timeout: 60000
     });
 
     const pdfOptions = parsePdfOptions(options);
@@ -132,9 +139,10 @@ async function generateFromUrl(url, options = {}) {
     await page.setViewport({ width: 1280, height: 800 });
 
     // Navigate to URL
+    // Use 'load' only — networkidle0 can time out on JS-heavy pages or slow networks.
     await page.goto(url, {
-      waitUntil: ['load', 'networkidle0'],
-      timeout: 30000 // 30 seconds timeout
+      waitUntil: ['load', 'domcontentloaded'],
+      timeout: 60000 // 60 seconds timeout
     });
 
     const pdfOptions = parsePdfOptions(options);
