@@ -247,7 +247,8 @@ async function generatePdf(endpoint, bodyData, loaderEl, placeholderEl, iframeEl
     const res = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(bodyData) });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `HTTP ${res.status}`);
+      const errMsg = err.details ? `${err.error}: ${err.details}` : (err.error || `HTTP ${res.status}`);
+      throw new Error(errMsg);
     }
     const blob = await res.blob();
     const ms = Math.round(performance.now() - t0);

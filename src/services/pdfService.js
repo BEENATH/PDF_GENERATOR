@@ -32,7 +32,6 @@ async function getBrowser() {
   // Linux-only args (breaks Chrome on Windows/macOS)
   const linuxOnlyArgs = [
     '--no-zygote',
-    '--single-process',
   ];
 
   const launchOptions = {
@@ -42,10 +41,24 @@ async function getBrowser() {
 
   // If environment specifies a custom executable path (useful for Linux/Docker)
   if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    if (fs.existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    } else {
+      console.warn(`WARNING: Configured PUPPETEER_EXECUTABLE_PATH not found at ${process.env.PUPPETEER_EXECUTABLE_PATH}. Falling back to default browser...`);
+    }
   }
 
-  return await puppeteer.launch(launchOptions);
+  try {
+    return await puppeteer.launch(launchOptions);
+  } catch (error) {
+    console.error('Initial Puppeteer launch failed. Trying fallback launch options...', error);
+    // Fallback launch options with minimal standard parameters
+    const fallbackOptions = {
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    };
+    return await puppeteer.launch(fallbackOptions);
+  }
 }
 
 /**
