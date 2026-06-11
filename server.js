@@ -30,29 +30,51 @@ app.use('/src/templates', express.static(path.join(__dirname, 'src', 'templates'
 
 
 // =========================================================================
-// ⭐ ඔයාට බ්‍රවුසර් එකෙන් කෙලින්ම PDF එක බලන්න එකතු කරපු අලුත් කෝඩ් එක ⭐
+// ⭐ බ්‍රවුසර් එකෙන් කෙලින්ම PDF එක බලන්න හදපු නිවැරදි කෝඩ් එක ⭐
 // =========================================================================
 app.get('/view-pdf', async (req, res) => {
     try {
         // බ්‍රවුසර් එකේ URL එකෙන් දත්ත ටික ලබා ගැනීම
         const { invoiceNumber, companyName, dueDate, billingAddress } = req.query;
 
-        // PDF සර්විස් එකට අවශ්‍ය විදිහට දත්ත Payload එක සකසා ගැනීම
-        const dataPayload = {
-            invoiceNumber: invoiceNumber || 'INV-0000',
-            companyName: companyName || 'Default Company',
-            dueDate: dueDate || new Date().toLocaleDateString(),
-            billingAddress: billingAddress || 'Not Provided',
-            items: [] // බ්‍රවුසර් ලින්ක් එකෙන් ලැයිස්තු යැවිය නොහැකි නිසා දැනට හිස්ව තබයි
-        };
+        // දත්ත ටික සරල ලස්සන HTML එකකට සකසා ගැනීම
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    body { font-family: sans-serif; padding: 40px; color: #333; }
+                    .invoice-box { max-width: 800px; margin: auto; border: 1px solid #eee; padding: 30px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }
+                    h1 { color: #2c3e50; margin-bottom: 0; }
+                    .details { margin-top: 20px; margin-bottom: 40px; }
+                    .details p { margin: 5px 0; }
+                    .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #777; }
+                </style>
+            </head>
+            <body>
+                <div class="invoice-box">
+                    <h1>INVOICE</h1>
+                    <hr>
+                    <div class="details">
+                        <p><strong>Invoice Number:</strong> ${invoiceNumber || 'INV-0000'}</p>
+                        <p><strong>Company Name:</strong> ${companyName || 'Default Company'}</p>
+                        <p><strong>Due Date:</strong> ${dueDate || new Date().toLocaleDateString()}</p>
+                        <p><strong>Billing Address:</strong> ${billingAddress || 'Not Provided'}</p>
+                    </div>
+                    <div class="footer">
+                        Generated via PDF API Webservice
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
 
-        // PDF එක පසුබිමෙන් ජනනය කිරීම
-        const pdfBuffer = await pdfService.generatePDF(dataPayload);
+        // 💡 pdfService එකේ තියෙන නිවැරදිම function එක (generateFromHtml) මෙතනදී call කරනවා
+        const pdfBuffer = await pdfService.generateFromHtml(htmlContent);
 
         // බ්‍රවුසර් එකට PDF එකක් බව හැඟවීමට headers සකස් කිරීම
         res.setHeader('Content-Type', 'application/pdf');
-        
-        // inline දැමීමෙන් ඩවුන්ලෝඩ් නොවී බ්‍රවුසර් එකේම දිස්වේ
         res.setHeader('Content-Disposition', 'inline; filename=invoice.pdf'); 
 
         // PDF එක බ්‍රවුසර් එකට සෘජුවම යැවීම
@@ -84,7 +106,7 @@ const apiLimiter = rateLimit({
 // Apply rate limiting to all generate requests
 app.use('/api/v1/generate', apiLimiter);
 
-// Mount API routes (මේක ඇතුලේ ඔයාගේ පරණ Postman ක්‍රමය ඒ විදිහටම තියෙනවා)
+// Mount API routes
 app.use('/api/v1', apiRoutes);
 
 // Root path fallback - serves the dashboard
