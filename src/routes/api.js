@@ -4,11 +4,11 @@ const path = require('path');
 const fs = require('fs');
 const pdfService = require('../services/pdfService');
 
-// ─── Auth Middleware ──────────────────────────────────────────────────────────
+
 
 const authenticateApiKey = (req, res, next) => {
   const configuredApiKey = process.env.API_KEY;
-  if (!configuredApiKey) return next(); // API_KEY not set = open access
+  if (!configuredApiKey) return next(); 
 
   const authHeader = req.headers['authorization'];
   let apiKey = null;
@@ -31,7 +31,7 @@ const authenticateApiKey = (req, res, next) => {
   next();
 };
 
-// ─── PDF Response Helper ──────────────────────────────────────────────────────
+
 
 const sendPdfResponse = (res, pdfBuffer, req) => {
   const filename = req.query.filename || req.body.filename || 'generated-document.pdf';
@@ -44,22 +44,18 @@ const sendPdfResponse = (res, pdfBuffer, req) => {
   res.send(pdfBuffer);
 };
 
-// Apply auth to all /generate/* routes
+
 router.use('/generate', authenticateApiKey);
 
-// ─── Invoice HTML Builder ─────────────────────────────────────────────────────
 
-/**
- * Builds a polished, self-contained invoice HTML string from structured JSON.
- * No external template file needed — this is the embedded engine for /generate/invoice.
- */
+
 function buildInvoiceHtml(data) {
   const {
-    // Sender (your business)
+    
     from = {},
-    // Recipient (client)
+    
     to = {},
-    // Invoice metadata
+    
     invoiceNumber = 'INV-001',
     invoiceDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     dueDate = '',
@@ -67,12 +63,12 @@ function buildInvoiceHtml(data) {
     currencySymbol = '$',
     paymentMethod = '',
     notes = '',
-    // Line items
+
     items = [],
-    // Tax & discount
+
     taxRate = 0,
     discountRate = 0,
-    // Branding
+
     accentColor = '#2563eb',
     logoText = '',
     logoUrl = '',
@@ -92,7 +88,7 @@ function buildInvoiceHtml(data) {
     ? `<img src="${logoUrl}" alt="${logoText || from.company || 'Logo'}" style="max-width: ${logoWidth}; height: auto; display: block; margin-bottom: 8px;">`
     : `<div class="brand-logo">${logoText || from.company || 'Invoice'}</div>`;
 
-  // Auto-calculate totals
+  
   const subtotal = items.reduce((sum, item) => {
     const qty = parseFloat(item.quantity) || 0;
     const price = parseFloat(item.unitPrice) || 0;
@@ -148,7 +144,7 @@ function buildInvoiceHtml(data) {
       padding: 48px;
     }
 
-    /* ── Header ── */
+    
     .header {
       display: flex;
       justify-content: space-between;
@@ -186,7 +182,7 @@ function buildInvoiceHtml(data) {
     .meta-grid div { margin-top: 4px; }
     .meta-grid strong { color: #0f172a; }
 
-    /* ── Divider ── */
+    
     .divider {
       height: 2px;
       background: linear-gradient(to right, ${accentColor}, transparent);
@@ -194,7 +190,7 @@ function buildInvoiceHtml(data) {
       border: none;
     }
 
-    /* ── Bill Info ── */
+    
     .billing-section {
       display: flex;
       justify-content: space-between;
@@ -213,7 +209,7 @@ function buildInvoiceHtml(data) {
     .billing-name { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
     .billing-detail { font-size: 13px; color: #64748b; line-height: 1.7; }
 
-    /* ── Items Table ── */
+    
     table {
       width: 100%;
       border-collapse: collapse;
@@ -239,7 +235,7 @@ function buildInvoiceHtml(data) {
     .item-desc { font-size: 12px; color: #94a3b8; margin-top: 2px; }
     .amount { font-weight: 600; color: #0f172a; }
 
-    /* ── Totals ── */
+    
     .totals-wrapper {
       display: flex;
       justify-content: flex-end;
@@ -263,7 +259,7 @@ function buildInvoiceHtml(data) {
       border-top: 2px solid #e2e8f0;
     }
 
-    /* ── Notes & Payment ── */
+    
     .bottom-section {
       display: flex;
       justify-content: space-between;
@@ -299,7 +295,7 @@ function buildInvoiceHtml(data) {
     .payment-method { font-size: 14px; font-weight: 600; color: #0f172a; }
     .payment-due { font-size: 13px; color: #64748b; margin-top: 4px; }
 
-    /* ── Footer ── */
+    
     .footer {
       margin-top: 48px;
       padding-top: 20px;
@@ -309,14 +305,13 @@ function buildInvoiceHtml(data) {
       color: #94a3b8;
     }
 
-    /* ── Utilities ── */
+    
     .text-right  { text-align: right; }
     .text-center { text-align: center; }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
   <div class="header">
     <div>
       ${logoHtml}
@@ -340,7 +335,6 @@ function buildInvoiceHtml(data) {
 
   <hr class="divider">
 
-  <!-- Bill To / From -->
   <div class="billing-section">
     <div class="billing-block">
       <div class="billing-label">Billed To</div>
@@ -364,7 +358,6 @@ function buildInvoiceHtml(data) {
     </div>
   </div>
 
-  <!-- Line Items -->
   <table>
     <thead>
       <tr>
@@ -379,14 +372,12 @@ function buildInvoiceHtml(data) {
     </tbody>
   </table>
 
-  <!-- Totals -->
   <div class="totals-wrapper">
     <table class="totals-table">
       ${totalsRows}
     </table>
   </div>
 
-  <!-- Notes + Payment -->
   <div class="bottom-section">
     ${notes ? `<div class="notes-block"><div class="notes-title">Notes</div><div class="notes-text">${notes}</div></div>` : '<div></div>'}
     ${paymentMethod ? `
@@ -397,7 +388,6 @@ function buildInvoiceHtml(data) {
     </div>` : ''}
   </div>
 
-  <!-- Footer -->
   <div class="footer">
     Thank you for your business!
     ${from.company ? ` — ${from.company}` : ''}
@@ -407,7 +397,6 @@ function buildInvoiceHtml(data) {
 </html>`;
 }
 
-// ─── Route Handlers ───────────────────────────────────────────────────────────
 
 const handleInvoiceGenerate = async (req, res) => {
   let body;
@@ -420,7 +409,7 @@ const handleInvoiceGenerate = async (req, res) => {
       }
     } else {
       body = { ...req.query };
-      // Parse nested objects/arrays if they are JSON strings
+      
       if (typeof body.from === 'string') {
         try { body.from = JSON.parse(body.from); } catch (e) {}
       }
@@ -435,7 +424,7 @@ const handleInvoiceGenerate = async (req, res) => {
     body = req.body;
   }
 
-  // Validate: at minimum we need items array
+  
   if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
     return res.status(400).json({
       success: false,
@@ -592,7 +581,7 @@ const handleTemplateGenerate = async (req, res) => {
   }
 };
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+
 
 router.route('/generate/invoice')
   .post(handleInvoiceGenerate)
@@ -614,9 +603,6 @@ router.route('/generate/template')
   .post(handleTemplateGenerate)
   .get(handleTemplateGenerate);
 
-/**
- * GET /api/v1/health
- */
 router.get('/health', (req, res) => {
   res.json({
     status: 'healthy',

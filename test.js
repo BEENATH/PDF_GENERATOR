@@ -8,10 +8,8 @@ const BASE_URL = `http://localhost:${PORT}/api/v1`;
 
 let serverProcess = null;
 
-// Helper to wait
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Start the server process
 function startServer() {
   return new Promise((resolve, reject) => {
     console.log('🔄 Starting test server...');
@@ -41,12 +39,10 @@ function startServer() {
       reject(err);
     });
 
-    // Fallback timeout in case output doesn't match
     setTimeout(resolve, 3000);
   });
 }
 
-// Stop the server
 function stopServer() {
   if (serverProcess) {
     console.log('⏹️ Stopping test server...');
@@ -54,13 +50,11 @@ function stopServer() {
   }
 }
 
-// Custom simple test runner
 const tests = [];
 function test(name, fn) {
   tests.push({ name, fn });
 }
 
-// Define the test cases
 test('GET /health - should return healthy state', async () => {
   const res = await fetch(`${BASE_URL}/health`);
   assert.strictEqual(res.status, 200);
@@ -266,13 +260,12 @@ test('GET /generate/invoice - should generate PDF from invoice query parameters'
   assert.strictEqual(pdfHeader, '%PDF');
 });
 
-// Run all tests
 async function run() {
   let failed = 0;
   
   try {
     await startServer();
-    // Extra safety wait for express server connections
+
     await sleep(1000);
     
     console.log('\n🏃 Running API Integration Tests...\n');

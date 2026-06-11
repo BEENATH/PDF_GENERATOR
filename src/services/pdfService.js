@@ -4,21 +4,16 @@ const handlebars = require('handlebars');
 const fs = require('fs');
 const path = require('path');
 
-// Configure marked options
+
 marked.setOptions({
   gfm: true,
   breaks: true
 });
 
-/**
- * Launch a Puppeteer browser instance with safe defaults.
- * NOTE: --single-process and --no-zygote are Linux-only flags that CRASH Chrome on Windows.
- * We use OS detection so those flags are only applied in Linux/Docker environments.
- */
 async function getBrowser() {
   const isLinux = process.platform === 'linux';
 
-  // Base args that are safe across all platforms
+  
   const baseArgs = [
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -29,17 +24,17 @@ async function getBrowser() {
     '--disable-extensions',
   ];
 
-  // Linux-only args (breaks Chrome on Windows/macOS)
+  
   const linuxOnlyArgs = [
     '--no-zygote',
   ];
 
   const launchOptions = {
-    headless: true, // use boolean true for widest compatibility across Puppeteer versions
+    headless: true, 
     args: isLinux ? [...baseArgs, ...linuxOnlyArgs] : baseArgs,
   };
 
-  // If environment specifies a custom executable path (useful for Linux/Docker)
+  
   if (process.env.PUPPETEER_EXECUTABLE_PATH) {
     if (fs.existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)) {
       launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
@@ -52,7 +47,7 @@ async function getBrowser() {
     return await puppeteer.launch(launchOptions);
   } catch (error) {
     console.error('Initial Puppeteer launch failed. Trying fallback launch options...', error);
-    // Fallback launch options with minimal standard parameters
+    
     const fallbackOptions = {
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
@@ -61,9 +56,6 @@ async function getBrowser() {
   }
 }
 
-/**
- * Normalizes options for PDF generation
- */
 function parsePdfOptions(options = {}) {
   return {
     format: options.format || 'A4',
@@ -71,7 +63,7 @@ function parsePdfOptions(options = {}) {
     printBackground: options.printBackground !== 'false' && options.printBackground !== false,
     scale: parseFloat(options.scale) || 1,
     displayHeaderFooter: options.displayHeaderFooter === 'true' || options.displayHeaderFooter === true,
-    headerTemplate: options.headerTemplate || ' ', // space triggers blank rather than default header
+    headerTemplate: options.headerTemplate || ' ', 
     footerTemplate: options.footerTemplate || ' ',
     margin: {
       top: options.marginTop || '15mm',
@@ -82,28 +74,22 @@ function parsePdfOptions(options = {}) {
   };
 }
 
-/**
- * Generate PDF buffer from HTML content
- * @param {string} htmlContent - Raw HTML code
- * @param {object} options - Custom PDF formatting options
- * @returns {Promise<Buffer>} - Generated PDF Buffer
- */
 async function generateFromHtml(htmlContent, options = {}) {
   let browser = null;
   try {
     browser = await getBrowser();
     const page = await browser.newPage();
 
-    // Set viewport for consistent rendering
+    
     await page.setViewport({ width: 1280, height: 800 });
 
-    // Set the HTML content.
-    // NOTE: We deliberately avoid 'networkidle0' here — on cloud hosts (Render, Railway, etc.)
-    // headless Chrome will try to load external resources (e.g. Google Fonts via @import)
-    // and networkidle0 will wait until ALL those outbound requests settle, which can
-    // easily exceed 30s and cause a navigation timeout.  'load' + 'domcontentloaded' is
-    // sufficient for PDF rendering because Puppeteer's pdf() call happens after the DOM
-    // is fully parsed; fonts that fail to load just fall back to system fonts.
+    
+    
+    
+    
+    
+    
+    
     await page.setContent(htmlContent, {
       waitUntil: ['load', 'domcontentloaded'],
       timeout: 60000
@@ -123,26 +109,20 @@ async function generateFromHtml(htmlContent, options = {}) {
   }
 }
 
-/**
- * Generate PDF buffer from a URL
- * @param {string} url - Target URL to load and print
- * @param {object} options - Custom PDF formatting options
- * @returns {Promise<Buffer>} - Generated PDF Buffer
- */
 async function generateFromUrl(url, options = {}) {
   let browser = null;
   try {
     browser = await getBrowser();
     const page = await browser.newPage();
 
-    // Set viewport
+    
     await page.setViewport({ width: 1280, height: 800 });
 
-    // Navigate to URL
-    // Use 'load' only — networkidle0 can time out on JS-heavy pages or slow networks.
+    
+    
     await page.goto(url, {
       waitUntil: ['load', 'domcontentloaded'],
-      timeout: 60000 // 60 seconds timeout
+      timeout: 60000 
     });
 
     const pdfOptions = parsePdfOptions(options);
@@ -159,16 +139,10 @@ async function generateFromUrl(url, options = {}) {
   }
 }
 
-/**
- * Generate PDF buffer from Markdown
- * @param {string} markdownContent - Markdown string
- * @param {object} options - Custom PDF formatting options
- * @returns {Promise<Buffer>} - Generated PDF Buffer
- */
 async function generateFromMarkdown(markdownContent, options = {}) {
   const parsedHtml = marked(markdownContent);
   
-  // Wrap in simple HTML structure with clean defaults for typography
+  
   const fullHtml = `
     <!DOCTYPE html>
     <html>
@@ -242,13 +216,6 @@ async function generateFromMarkdown(markdownContent, options = {}) {
   return await generateFromHtml(fullHtml, options);
 }
 
-/**
- * Generate PDF buffer from template using Handlebars
- * @param {string} templateSource - HTML template containing handlebars variables
- * @param {object} templateData - JSON data to inject into template
- * @param {object} options - Custom PDF formatting options
- * @returns {Promise<Buffer>} - Generated PDF Buffer
- */
 async function generateFromTemplate(templateSource, templateData, options = {}) {
   const template = handlebars.compile(templateSource);
   const compiledHtml = template(templateData);

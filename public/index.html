@@ -13,7 +13,6 @@
 <body>
   <div class="app-container">
 
-    <!-- ═══ Header ═══ -->
     <header class="main-header">
       <div class="logo-area">
         <svg class="logo-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5C3.89 3 3 3.89 3 5V19C3 20.11 3.89 21 5 21H19C20.11 21 21 20.11 21 19V5C21 3.89 20.11 3 19 3ZM16 17H8V15H16V17ZM16 13H8V11H16V13ZM16 9H8V7H16V9Z"/></svg>
@@ -32,7 +31,7 @@
       </div>
     </header>
 
-    <!-- ═══ API Key Bar ═══ -->
+    
     <div class="api-key-bar">
       <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="color: var(--accent-blue); flex-shrink:0;"><path d="M12.65 10C11.83 7.67 9.61 6 7 6C3.69 6 1 8.69 1 12C1 15.31 3.69 18 7 18C9.61 18 11.83 16.33 12.65 14H17V18H21V14H23V10H12.65ZM7 14C5.9 14 5 13.1 5 12C5 10.9 5.9 10 7 10C8.1 10 9 10.9 9 12C9 13.1 8.1 14 7 14Z"/></svg>
       <label for="apiKeyInput" style="font-size:12px;font-weight:700;color:var(--text-muted);white-space:nowrap;">API KEY</label>
@@ -44,10 +43,10 @@
       <span id="baseUrlDisplay" class="base-url-display"></span>
     </div>
 
-    <!-- ═══ Pages ═══ -->
+    
     <main class="pages-container">
 
-      <!-- ══ PAGE: Playground ══ -->
+      
       <div class="page active" id="page-playground">
         <div class="workspace">
           <section class="controls-panel">
@@ -60,12 +59,11 @@
               </div>
 
               <div class="tabs-content">
-                <!-- HTML -->
                 <div class="tab-panel active" id="panel-html">
                   <div class="editor-header"><span>Raw HTML</span><button class="btn-small-outline" id="loadSampleHtml">Reset</button></div>
                   <textarea id="htmlInput" class="code-editor" spellcheck="false"></textarea>
                 </div>
-                <!-- URL -->
+                
                 <div class="tab-panel" id="panel-url">
                   <label class="section-label">Target URL</label>
                   <div class="input-wrapper" style="margin-top:6px">
@@ -74,12 +72,12 @@
                   </div>
                   <p class="input-hint">Puppeteer browses this URL, waits for JS to load, then prints it to PDF.</p>
                 </div>
-                <!-- Markdown -->
+                
                 <div class="tab-panel" id="panel-markdown">
                   <div class="editor-header"><span>Markdown</span><button class="btn-small-outline" id="loadSampleMarkdown">Reset</button></div>
                   <textarea id="markdownInput" class="code-editor" spellcheck="false"></textarea>
                 </div>
-                <!-- Templates -->
+                
                 <div class="tab-panel" id="panel-templates">
                   <label class="section-label">Template</label>
                   <select id="templateSelect" class="styled-select" style="margin-top:6px"></select>
@@ -88,7 +86,7 @@
                 </div>
               </div>
 
-              <!-- PDF Options -->
+              
               <div class="settings-section">
                 <div class="settings-toggle" id="settingsToggle">
                   <span class="section-label" style="margin:0">PDF Options</span>
@@ -143,7 +141,7 @@
                 </div>
                 <iframe id="pdfIframe" class="pdf-viewer" style="display:none"></iframe>
               </div>
-              <!-- Code Snippets -->
+              
               <div class="code-integration-section">
                 <div class="tabs-header code-tabs">
                   <button class="code-tab-btn active" data-lang="curl">cURL</button>
@@ -160,11 +158,11 @@
         </div>
       </div>
 
-      <!-- ══ PAGE: Invoice Generator ══ -->
+      
       <div class="page" id="page-invoice">
         <div class="invoice-workspace">
 
-          <!-- Left: Form -->
+          
           <div class="invoice-form-panel">
             <div class="card panel-card">
               <div class="inv-section-title">
@@ -172,7 +170,7 @@
                 Invoice Details
               </div>
 
-              <!-- Business Info -->
+              
               <div class="inv-group-label">Your Business</div>
               <div class="grid-2">
                 <div class="form-group"><label>Company Name</label><input type="text" id="inv-from-company" value="Stellar Cloud Systems Ltd"></div>
@@ -186,7 +184,7 @@
 
               <div style="height:1px;background:var(--border-color);margin:16px 0"></div>
 
-              <!-- Client Info -->
+              
               <div class="inv-group-label">Client (Bill To)</div>
               <div class="grid-2">
                 <div class="form-group"><label>Client Name</label><input type="text" id="inv-to-name" value="CyberDyne Systems Inc"></div>
@@ -196,7 +194,7 @@
 
               <div style="height:1px;background:var(--border-color);margin:16px 0"></div>
 
-              <!-- Invoice Meta -->
+              
               <div class="inv-group-label">Invoice Info</div>
               <div class="grid-2">
                 <div class="form-group"><label>Invoice Number</label><input type="text" id="inv-number" value="INV-2026-001"></div>
@@ -223,14 +221,14 @@
 
               <div style="height:1px;background:var(--border-color);margin:16px 0"></div>
 
-              <!-- Line Items -->
+              
               <div class="inv-group-label">
                 Line Items
                 <button class="btn-small-outline" id="addItemBtn" style="margin-left:auto">+ Add Item</button>
               </div>
               <div id="itemsList"></div>
 
-              <!-- Actions -->
+              
               <div class="actions-panel" style="margin-top:8px">
                 <button class="btn btn-primary" id="invBtnPreview">
                   <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:8px"><path d="M12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5Z"/></svg>
@@ -244,7 +242,7 @@
             </div>
           </div>
 
-          <!-- Right: Preview + Code -->
+          
           <div class="invoice-preview-panel">
             <div class="card preview-card">
               <div class="preview-header">
@@ -261,7 +259,7 @@
                 <iframe id="invPdfIframe" class="pdf-viewer" style="display:none"></iframe>
               </div>
 
-              <!-- Integration Code -->
+              
               <div class="code-integration-section">
                 <div class="tabs-header code-tabs">
                   <button class="code-tab-btn active" data-lang="curl">cURL</button>
@@ -278,7 +276,7 @@
         </div>
       </div>
 
-      <!-- ══ PAGE: API Docs ══ -->
+      
       <div class="page" id="page-docs">
         <div class="docs-container">
           <div class="docs-hero">

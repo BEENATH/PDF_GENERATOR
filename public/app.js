@@ -1,4 +1,4 @@
-// ─── Sample Content ───────────────────────────────────────────────────────────
+
 const SAMPLES = {
   html: `<!DOCTYPE html>
 <html>
@@ -59,7 +59,7 @@ This document was generated from **Markdown** via the AeroPDF API.
   }
 };
 
-// ─── State ────────────────────────────────────────────────────────────────────
+
 const state = {
   activePage: 'playground',
   activeTab: 'html',
@@ -68,15 +68,15 @@ const state = {
   invItems: []
 };
 
-// ─── DOM Helpers ──────────────────────────────────────────────────────────────
+
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
+
 window.addEventListener('DOMContentLoaded', () => {
   $('baseUrlDisplay').textContent = window.location.origin;
 
-  // Extract API key from URL query parameters
+  
   const urlParams = new URLSearchParams(window.location.search);
   const urlKey = urlParams.get('apiKey') || urlParams.get('key') || urlParams.get('api_key');
   
@@ -84,7 +84,7 @@ window.addEventListener('DOMContentLoaded', () => {
     $('apiKeyInput').value = urlKey;
     localStorage.setItem('pdf_api_key', urlKey);
   } else {
-    // Load from localStorage if present
+    
     const cachedKey = localStorage.getItem('pdf_api_key');
     if (cachedKey) {
       $('apiKeyInput').value = cachedKey;
@@ -94,8 +94,8 @@ window.addEventListener('DOMContentLoaded', () => {
   $('htmlInput').value = SAMPLES.html;
   $('markdownInput').value = SAMPLES.markdown;
   populateTemplateSelect();
-  addInvoiceItem();  // start with one blank item
-  addInvoiceItem();  // and a second
+  addInvoiceItem();  
+  addInvoiceItem();  
   prefillSampleItems();
   checkHealth();
   bindEvents();
@@ -115,7 +115,7 @@ async function checkHealth() {
       } else {
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         if (!isLocalhost && $('apiKeyInput').value === 'pdf_dev_key_abc123') {
-          // Clear default dev key on production to prevent 401 errors
+          
           $('apiKeyInput').value = '';
           localStorage.removeItem('pdf_api_key');
           updateCodeSnippet();
@@ -126,7 +126,7 @@ async function checkHealth() {
   } catch {}
 }
 
-// ─── Template Select ──────────────────────────────────────────────────────────
+
 function populateTemplateSelect() {
   const sel = $('templateSelect');
   sel.innerHTML = `
@@ -143,7 +143,7 @@ function loadTemplateData(name) {
   updateCodeSnippet();
 }
 
-// ─── Invoice Line Items ───────────────────────────────────────────────────────
+
 function addInvoiceItem(name = '', desc = '', qty = 1, price = 0) {
   const id = Date.now() + Math.random();
   state.invItems.push({ id, name, desc, qty, price });
@@ -195,7 +195,7 @@ function prefillSampleItems() {
   renderItems();
 }
 
-// ─── Collect Invoice Payload ──────────────────────────────────────────────────
+
 function getInvoicePayload(isDownload = false) {
   return {
     from: {
@@ -234,7 +234,7 @@ function getInvoicePayload(isDownload = false) {
   };
 }
 
-// ─── Generate PDF ─────────────────────────────────────────────────────────────
+
 async function generatePdf(endpoint, bodyData, loaderEl, placeholderEl, iframeEl, perfMetricEl, perfValEl) {
   loaderEl.style.display = 'flex';
   perfMetricEl.style.display = 'none';
@@ -262,7 +262,7 @@ async function generatePdf(endpoint, bodyData, loaderEl, placeholderEl, iframeEl
 
 async function handlePlaygroundAction(isDownload) {
   const tab = state.activeTab;
-  // 'templates' is the UI tab name; the actual endpoint path is 'template' (singular)
+  
   const endpointSlug = tab === 'templates' ? 'template' : tab;
   let endpoint = `/api/v1/generate/${endpointSlug}`;
   const body = { download: isDownload, options: getPlaygroundOptions() };
@@ -322,7 +322,7 @@ async function handleInvoiceAction(isDownload) {
   } catch(e) { alert('Invoice generation failed: ' + e.message); }
 }
 
-// ─── Options ──────────────────────────────────────────────────────────────────
+
 function getPlaygroundOptions() {
   return {
     format: $('pdfFormat').value,
@@ -336,10 +336,10 @@ function getPlaygroundOptions() {
   };
 }
 
-// ─── Code Snippets ────────────────────────────────────────────────────────────
+
 function updateCodeSnippet() {
   const host = (window.location.origin === 'null' || !window.location.origin) ? 'http://localhost:3000' : window.location.origin;
-  // 'templates' is the UI tab name; the actual endpoint path is 'template' (singular)
+  
   const endpointSlug = state.activeTab === 'templates' ? 'template' : state.activeTab;
   const endpoint = `${host}/api/v1/generate/${endpointSlug}`;
   const apiKey = $('apiKeyInput').value.trim() || 'YOUR_API_KEY';
@@ -415,9 +415,8 @@ else:
   return '';
 }
 
-// ─── Event Bindings ───────────────────────────────────────────────────────────
 function bindEvents() {
-  // Page nav
+
   $$('.nav-btn').forEach(btn => btn.addEventListener('click', () => {
     $$('.nav-btn').forEach(b => b.classList.remove('active'));
     $$('.page').forEach(p => p.classList.remove('active'));
@@ -427,7 +426,6 @@ function bindEvents() {
     state.activePage = btn.dataset.page;
   }));
 
-  // API Key toggle
   $('toggleApiKey').addEventListener('click', () => {
     const inp = $('apiKeyInput');
     inp.type = inp.type === 'password' ? 'text' : 'password';
@@ -442,7 +440,7 @@ function bindEvents() {
     updateCodeSnippet();
     updateInvCodeSnippet();
   });
-  // Playground tabs
+  
   $$('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
     $$('.tab-btn').forEach(b => b.classList.remove('active'));
     $$('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -452,21 +450,21 @@ function bindEvents() {
     updateCodeSnippet();
   }));
 
-  // Playground resets
+  
   $('loadSampleHtml')?.addEventListener('click', () => { $('htmlInput').value = SAMPLES.html; updateCodeSnippet(); });
   $('loadSampleMarkdown')?.addEventListener('click', () => { $('markdownInput').value = SAMPLES.markdown; updateCodeSnippet(); });
 
-  // Settings accordion
+  
   $('settingsToggle')?.addEventListener('click', () => {
     $('settingsContent').classList.toggle('collapsed');
     $('settingsChevron').classList.toggle('rotate');
   });
 
-  // Playground actions
+  
   $('btnPreview').addEventListener('click', () => handlePlaygroundAction(false));
   $('btnDownload').addEventListener('click', () => handlePlaygroundAction(true));
 
-  // Playground code tabs
+  
   $$('.code-tab-btn').forEach(btn => {
     const container = btn.closest('.code-integration-section');
     btn.addEventListener('click', () => {
@@ -480,7 +478,7 @@ function bindEvents() {
     });
   });
 
-  // Copy buttons
+  
   $$('.btn-copy').forEach(btn => {
     btn.addEventListener('click', () => {
       const code = btn.closest('.code-container').querySelector('.code-block').textContent;
@@ -491,12 +489,12 @@ function bindEvents() {
     });
   });
 
-  // Invoice actions
+  
   $('addItemBtn').addEventListener('click', () => addInvoiceItem());
   $('invBtnPreview').addEventListener('click', () => handleInvoiceAction(false));
   $('invBtnDownload').addEventListener('click', () => handleInvoiceAction(true));
 
-  // Invoice form live code update
+  
   ['inv-from-company','inv-from-email','inv-from-phone','inv-from-address','inv-from-taxid',
    'inv-to-name','inv-to-email','inv-to-address','inv-number','inv-currency-symbol',
    'inv-date','inv-due','inv-tax','inv-discount','inv-payment','inv-notes','inv-color',
@@ -505,7 +503,7 @@ function bindEvents() {
     $(id)?.addEventListener('change', updateInvCodeSnippet);
   });
 
-  // Inputs that affect playground snippet
+  
   ['pdfFormat','pdfOrientation','pdfScale','pdfFilename','marginTop','marginBottom','marginLeft','marginRight','printBackground','urlInput']
     .forEach(id => $(id)?.addEventListener('input', updateCodeSnippet));
   ['pdfFormat','pdfOrientation'].forEach(id => $(id)?.addEventListener('change', updateCodeSnippet));

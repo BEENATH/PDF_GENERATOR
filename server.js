@@ -6,38 +6,38 @@ const path = require('path');
 const rateLimit = require('express-rate-limit');
 const apiRoutes = require('./src/routes/api');
 
-// 💡 PDF එක ජනනය කරන සර්විස් එක මෙතැනට Import කරගන්නවා
+
 const pdfService = require('./src/services/pdfService'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS for all origins (important for client-side API integrations)
+
 app.use(cors({
   exposedHeaders: ['Content-Disposition']
 }));
 
-// Logger middleware
+
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// Body parser with size limits for large HTML and base64 assets
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static website directory (for Dashboard/API playground)
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/src/templates', express.static(path.join(__dirname, 'src', 'templates')));
 
 
-// =========================================================================
-// ⭐ බ්‍රවුසර් එකෙන් කෙලින්ම PDF එක බලන්න හදපු නිවැරදි කෝඩ් එක ⭐
-// =========================================================================
+
+
+
 app.get('/view-pdf', async (req, res) => {
     try {
-        // බ්‍රවුසර් එකේ URL එකෙන් දත්ත ටික ලබා ගැනීම
+        
         const { invoiceNumber, companyName, dueDate, billingAddress } = req.query;
 
-        // දත්ත ටික සරල ලස්සන HTML එකකට සකසා ගැනීම
+        
         const htmlContent = `
             <!DOCTYPE html>
             <html>
@@ -70,14 +70,14 @@ app.get('/view-pdf', async (req, res) => {
             </html>
         `;
 
-        // 💡 pdfService එකේ තියෙන නිවැරදිම function එක (generateFromHtml) මෙතනදී call කරනවා
+        
         const pdfBuffer = await pdfService.generateFromHtml(htmlContent);
 
-        // බ්‍රවුසර් එකට PDF එකක් බව හැඟවීමට headers සකස් කිරීම
+        
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'inline; filename=invoice.pdf'); 
 
-        // PDF එක බ්‍රවුසර් එකට සෘජුවම යැවීම
+        
         res.send(pdfBuffer);
 
     } catch (error) {
@@ -85,12 +85,12 @@ app.get('/view-pdf', async (req, res) => {
         res.status(500).send('Error generating PDF view: ' + error.message);
     }
 });
-// =========================================================================
 
 
-// Configure rate limiting to protect endpoints
-const limiterWindowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000; // 15 mins default
-const limiterMax = parseInt(process.env.RATE_LIMIT_MAX) || 100; // 100 reqs default
+
+
+const limiterWindowMs = parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000; 
+const limiterMax = parseInt(process.env.RATE_LIMIT_MAX) || 100; 
 
 const apiLimiter = rateLimit({
   windowMs: limiterWindowMs,
@@ -99,22 +99,22 @@ const apiLimiter = rateLimit({
     success: false,
     error: 'Too many requests from this IP, please try again later.'
   },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true, 
+  legacyHeaders: false, 
 });
 
-// Apply rate limiting to all generate requests
+
 app.use('/api/v1/generate', apiLimiter);
 
-// Mount API routes
+
 app.use('/api/v1', apiRoutes);
 
-// Root path fallback - serves the dashboard
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Global Error Handler
+
 app.use((err, req, res, next) => {
   console.error('Unhandled Server Error:', err);
   res.status(500).json({
@@ -124,7 +124,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start the server
+
 app.listen(PORT, () => {
   console.log(`====================================================`);
   console.log(`  PDF Generator API Webservice successfully started`);
